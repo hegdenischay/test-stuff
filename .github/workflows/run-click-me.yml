@@ -28,9 +28,10 @@ jobs:
 
       - name: Open interactive SSH session
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.interactive }}
-        uses: mxschmitt/action-tmate@v3.24
+        uses: owenthereal/action-upterm@v2
         with:
           limit-access-to-actor: true
+          wait-timeout-minutes: 10
         timeout-minutes: 20
 
       - name: Inspect and run binary
