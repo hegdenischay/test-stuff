@@ -1,0 +1,30 @@
+name: Run click_me
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  run-click-me:
+    # GitHub-hosted macOS 14 standard runners use Apple Silicon (arm64).
+    runs-on: macos-14
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Inspect and run binary
+        run: |
+          uname -m
+          file ./click_me
+          lipo -archs ./click_me
+          chmod +x ./click_me
+          set +e
+          ./click_me
+          status=$?
+          echo "click_me exit status: ${status}"
+          exit "${status}"
