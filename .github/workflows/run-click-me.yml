@@ -2,6 +2,12 @@ name: Run click_me
 
 on:
   workflow_dispatch:
+    inputs:
+      interactive:
+        description: Open an SSH session to run the TUI manually
+        type: boolean
+        required: true
+        default: false
   push:
     branches: [main]
 
@@ -12,17 +18,27 @@ jobs:
   run-click-me:
     # GitHub-hosted macOS 14 standard runners use Apple Silicon (arm64).
     runs-on: macos-14
-    timeout-minutes: 5
+    timeout-minutes: 25
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Make binary executable
+        run: chmod +x ./click_me
+
+      - name: Open interactive SSH session
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.interactive }}
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
+        timeout-minutes: 20
+
       - name: Inspect and run binary
+        if: ${{ github.event_name != 'workflow_dispatch' || !inputs.interactive }}
         run: |
           uname -m
           file ./click_me
           lipo -archs ./click_me
-          chmod +x ./click_me
           set +e
           ./click_me
           status=$?
